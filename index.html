@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3A8C90">
+<title>Private English Tutor for Mi Jung</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+  body { -webkit-font-smoothing: antialiased; }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+
+/* ═══════════════════════════════════════════════
+   Private English Tutor for MJ — v31
+   Tiffany box texture + luxury typography + gold
+   ═══════════════════════════════════════════════ */
+
+/* ── COLOR SYSTEM (true Tiffany blue, not green) ── */
+const C = {
+  accent: "#81D8D0",
+  accentSoft: "#A7E7E0",
+  accentDeep: "#5FCFC5",
+  white: "#FFFFFF",
+  bgBase: "#5BB5B5",         /* Tiffany blue, slightly darker than box */
+  bgDarker: "#4DA3A5",       /* Deeper shade for variation */
+  bgDarkest: "#3F9498",      /* Darkest for depth */
+  headerBg: "#3A8C90",       /* Header darker */
+  silver: "#8DA3A3",
+  silverLight: "#4A9EA0",
+  dark: "#1F2A30",
+  darkSoft: "#3A4950",
+  darkMuted: "#5E7079",
+  textOnDark: "#EFFAF9",
+  textMutedOnDark: "#B8DCD9",
+  correctBold: "#2D8A80",
+  cardBg: "#D0EAE7",
+  gold: "#D4AF6A",            /* Warm gold like the yellow gold ring */
+  goldLight: "#E2C992",        /* Lighter gold highlight */
+  roseGold: "#C9A086",         /* Rose gold like the bottom ring */
+};
+
+const F = {
+  serif: "'Playfair Display', 'Didot', 'Bodoni MT', Georgia, serif",
+  sans: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+};
+
+/* ── ERROR DETECTION ENGINE ── */
+
+const CORRECTIONS = [
+  { pattern: /\b(too\s+|how\s+|so\s+|very\s+)?much\s+(cars?|dogs?|cats?|books?|friends?|students?|people|children|apples?|eggs?|cups?|glasses|boxes|houses?|trees?|flowers?|shoes?|shirts?|bags?|phones?|computers?|games?|movies?|songs?|pictures?|ideas?|problems?|questions?|answers?|stories|cities|countries|languages?|classes|lessons?|words?|sentences?|pages?|letters?|numbers?|days?|weeks?|months?|years?|hours?|minutes?|things?|places?|ways?|boys?|girls?|men|women|birds?|babies|toys?|balls?|cookies?|cakes?|dollars?|miles?|feet|teeth|mice|items?|pieces?|bottles?|plates?|chairs?|tables?|rooms?|buildings?|streets?|restaurants?|shops?|stores?|schools?|teachers?|doctors?|nurses?|players?|teams?|points?|goals?|mistakes?|choices?|options?|reasons?|examples?|results?)\b/gi,
+    fix: (m) => `${m[1] || ""}**many** ${m[2]}`,
+    tip: "much vs many! Use 'many' with countable nouns (things you can count). Use 'much' with uncountable nouns (water, money, time)." },
+  { pattern: /\b(too\s+|how\s+|so\s+)?many\s+(water|money|time|food|music|information|advice|furniture|homework|traffic|luggage|equipment|rice|bread|sugar|salt|coffee|tea|milk|juice|rain|snow|weather|work|fun|luck|news|knowledge|research|evidence|progress|space|room|air|energy|electricity|heat|light|noise|pollution|rubbish|trash|garbage|stuff|hair)\b/gi,
+    fix: (m) => `${m[1] || ""}**much** ${m[2]}`,
+    tip: "many vs much! Use 'much' with uncountable nouns (water, money, time)." },
+  { pattern: /\bless\s+(cars?|dogs?|cats?|books?|friends?|students?|people|children|apples?|problems?|questions?|mistakes?|hours?|minutes?|days?|weeks?|months?|years?|things?|items?|choices?|options?)\b/gi,
+    fix: (m) => `**fewer** ${m[1]}`,
+    tip: "less vs fewer! Use 'fewer' with countable nouns. Use 'less' with uncountable nouns." },
+  { pattern: /\b(i|he|she|we|they)\s+(go|went|walk|walked|drive|drove|come|came|run|ran)\s+to\s+(store|school|hospital|bank|office|park|beach|gym|market|airport|station|church|library|museum|restaurant|cinema|mall|supermarket)\b/gi,
+    fix: (m) => `${m[1]} ${m[2]} to **the** ${m[3]}`,
+    tip: "You need an article! Use 'the' before specific places." },
+  { pattern: /\b(go|went|come|came|walk|walked)\s+to\s+(home)\b/gi,
+    fix: (m) => `${m[1]} **home**`,
+    tip: "Don't use 'to' before 'home'! Say 'go home', not 'go to home'." },
+  { pattern: /^(am|is|are|was|were|have|has|had|do|does|did|can|could|will|would|should|must|might)\s/i,
+    fix: (m) => `**I** ${m[0].toLowerCase()}`,
+    tip: "You need a subject! English sentences must start with a subject (I, he, she, we...)." },
+  { pattern: /\bis\s+(very|so|really|too|quite|pretty)\s+(good|bad|nice|cold|hot|fun|hard|easy|big|small|tall|short|beautiful|delicious|interesting|boring|expensive|cheap|important|difficult|different|similar|popular|famous|dangerous|wonderful|terrible|amazing|great|cool|warm|fast|slow|loud|quiet|clean|dirty|safe|busy|empty|full|heavy|light|young|old|new|long|thick|thin)\b/gi,
+    fix: (m) => `**It** is ${m[1]} ${m[2]}`,
+    tip: "You need a subject! In English, every sentence needs a subject." },
+  { pattern: /\b(yesterday|last\s+(?:week|month|year|night|summer|winter|time)|ago)\b.*?\b(go|eat|drink|see|come|make|take|give|do|have|buy|sell|get|meet|feel|think|know|say|tell|find|write|read|run|swim|sing|begin|break|choose|drive|fly|grow|keep|leave|pay|send|sit|sleep|speak|stand|teach|wear|win)\b/gi,
+    fix: null,
+    tip: "Use the past tense! With 'yesterday', 'last week' etc., you need the past form of the verb." },
+  { pattern: /\b(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|thirty|fifty|hundred|thousand|million|many|several|few|some|a\s+lot\s+of|lots\s+of)\s+(dog|cat|book|car|friend|student|child|person|apple|egg|cup|glass|box|house|tree|flower|shoe|shirt|bag|phone|computer|game|movie|song|picture|idea|problem|question|answer|story|city|country|language|class|lesson|word|sentence|page|letter|number|day|week|month|year|hour|minute|thing|place|time|way|boy|girl|man|woman|bird|baby|toy|ball|cookie|cake|dollar|mile|foot|tooth|mouse|goose|leaf|knife|life|wife|shelf|half|wolf|calf|thief|loaf|item|piece|bottle|plate|chair|table|room|building|street|restaurant|shop|store|school|teacher|doctor|player|team|point|goal|mistake|choice|option|reason|example|result)\b/gi,
+    fix: (m) => {
+      const irr = { child:"children",person:"people",man:"men",woman:"women",fish:"fish",tooth:"teeth",mouse:"mice",goose:"geese",leaf:"leaves",knife:"knives",life:"lives",wife:"wives",shelf:"shelves",half:"halves",wolf:"wolves",calf:"calves",thief:"thieves",loaf:"loaves",foot:"feet" };
+      const w = m[2].toLowerCase();
+      const pl = irr[w] || (w.endsWith("y") && !"aeiou".includes(w[w.length-2]) ? w.slice(0,-1)+"ies" : w.endsWith("s")||w.endsWith("sh")||w.endsWith("ch")||w.endsWith("x") ? w+"es" : w+"s");
+      return `${m[1]} **${pl}**`;
+    },
+    tip: "You need the plural form! After numbers or 'many/some', add -s to the noun." },
+  { pattern: /\barrived?\s+to\b/gi, fix: () => "arrived **at**", tip: "Use 'at' after 'arrive', not 'to'! (arrive at the airport)." },
+  { pattern: /\bdiscuss\s+about\b/gi, fix: () => "**discuss**", tip: "'discuss' doesn't need 'about'! Say 'discuss the problem', not 'discuss about'." },
+  { pattern: /\bexplain\s+me\b/gi, fix: () => "explain **to me**", tip: "Use 'to' before the person with 'explain'! (explain to me)." },
+  { pattern: /\bbecause\s+(cold|hot|tired|hungry|sick|busy|late|early|bored|happy|sad|angry|scared|nervous|lonely|sleepy|thirsty|expensive|difficult|easy|important|interesting|boring|fun|dangerous|rainy|sunny|cloudy|windy)\b/gi,
+    fix: (m) => `because **it is** ${m[1]}`, tip: "After 'because', you need a subject + verb! (because it is cold)." },
+  { pattern: /\bi\s+am\s+(agree|disagree|understand|know|think|believe|want|need|like|love|hate|hope|wish|prefer|remember|forget|mean)\b/gi,
+    fix: (m) => `I **${m[1]}**`, tip: "Don't use 'am' with this verb! Say 'I agree', not 'I am agree'." },
+  { pattern: /\b(can|could|will|would|shall|should|may|might|must)\s+to\s+(\w+)\b/gi,
+    fix: (m) => `${m[1]} **${m[2]}**`, tip: "After modal verbs (can, should, must...), don't use 'to'! (I can swim, not I can to swim)." },
+  { pattern: /\b(i|he|she|we|they)\s+(am|is|are|was|were)\s+(interesting|boring|exciting|confusing|surprising|disappointing|exhausting|frustrating|annoying|embarrassing|shocking|amazing|terrifying|relaxing|satisfying|depressing|tiring|disgusting)\b/gi,
+    fix: (m) => `${m[1]} ${m[2]} **${m[3].replace(/ing$/,"ed")}**`,
+    tip: "People feel -ed, things are -ing! I am interest**ed** (I feel it) vs. It is interest**ing** (it causes the feeling)." },
+  { pattern: /\b(go|went|come|came|get|got)\s+to\s+(there|here|somewhere|anywhere|everywhere|nowhere)\b/gi,
+    fix: (m) => `${m[1]} **${m[2]}**`, tip: "Don't use 'to' before there/here! Say 'go there', not 'go to there'." },
+  { pattern: /\bsince\s+(\d+|two|three|four|five|six|seven|eight|nine|ten)\s+(years?|months?|weeks?|days?|hours?|minutes?)\b/gi,
+    fix: (m) => `**for** ${m[1]} ${m[2]}`, tip: "Use 'for' with duration, 'since' with a starting point! (for 3 years / since 2020)." },
+  { pattern: /\b(don't|doesn't|didn't|won't|can't|couldn't|wouldn't|shouldn't)\s+\w+\s+(nothing|nobody|nowhere|no\s+one)\b/gi,
+    fix: null, tip: "Watch out for double negatives! Say 'don't know anything' (not 'don't know nothing')." },
+  { pattern: /\bmarr(y|ied)\s+with\b/gi, fix: (m) => `marr${m[1]}`, tip: "Don't use 'with' after 'marry'! Say 'I married her', not 'I married with her'." },
+  { pattern: /\bdepends?\s+of\b/gi, fix: () => "depends **on**", tip: "Use 'on' after 'depend'! (It depends on the weather)." },
+];
+
+function checkErrors(text) {
+  const errors = [];
+  for (const rule of CORRECTIONS) {
+    const match = text.match(rule.pattern);
+    if (match) errors.push({ original: match[0], fixed: rule.fix ? rule.fix(match) : null, tip: rule.tip });
+  }
+  return errors;
+}
+
+/* ── GIBBERISH DETECTION & SENTENCE VALIDATION ── */
+
+// Instead of a dictionary whitelist, detect words that CAN'T be English
+function isGibberish(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g, "");
+  if (w.length <= 2) return false; // too short to judge (ok, TV, am, etc.)
+  
+  // Must contain at least one vowel (y counts)
+  if (!/[aeiouy]/.test(w)) return true;
+  
+  // No English word has 4+ consonants in a row
+  if (/[bcdfghjklmnpqrstvwxz]{4,}/.test(w)) return true;
+  
+  // No English word has 3+ of the same letter in a row
+  if (/(.)\1{2,}/.test(w)) return true;
+  
+  // Vowel-to-total ratio too extreme
+  const vowels = (w.match(/[aeiouy]/g) || []).length;
+  const ratio = vowels / w.length;
+  if (w.length > 3 && ratio < 0.15) return true; // almost no vowels
+  if (w.length > 3 && ratio > 0.85) return true; // almost all vowels
+  
+  // Unlikely patterns: q not followed by u, double-j, double-k, etc.
+  if (/q[^u]/.test(w) && w !== "qi") return true;
+  if (/jj|kk|vv|xx|zz|ww|yy/.test(w)) return true;
+  
+  return false;
+}
+
+function validateSentence(text) {
+  const issues = [];
+  const clean = text.trim();
+  const words = clean.split(/\s+/);
+  const alphaWords = words.filter(w => /[a-zA-Z]{2,}/.test(w));
+
+  // Too short
+  if (alphaWords.length === 1 && clean.length < 4) {
+    issues.push({ type: "short", tip: "One word isn't enough practice! Try writing a full sentence." });
+  }
+
+  // Check for gibberish words
+  const gibberishWords = alphaWords.filter(w => isGibberish(w.replace(/[^a-zA-Z]/g, "")));
+  
+  if (gibberishWords.length > 0 && gibberishWords.length >= alphaWords.length * 0.5) {
+    // Most words are gibberish
+    issues.push({ type: "gibberish", tip: "I can't understand this. Did you mean to write something else? Please try again!" });
+  } else if (gibberishWords.length > 0) {
+    const flagged = gibberishWords.slice(0, 3).map(w => `"${w}"`).join(", ");
+    issues.push({ type: "spelling", words: gibberishWords, tip: `This doesn't look right: ${flagged}. Check the spelling!` });
+  }
+
+  // No capital letter at start (if it looks like a sentence)
+  if (alphaWords.length >= 3 && clean[0] === clean[0].toLowerCase() && /[a-z]/.test(clean[0])) {
+    issues.push({ type: "capital", tip: "Start your sentence with a capital letter." });
+  }
+
+  // No period/question mark at end (if it looks like a sentence)
+  if (alphaWords.length >= 4 && !/[.!?]$/.test(clean)) {
+    issues.push({ type: "punctuation", tip: "End your sentence with a period (.) or question mark (?)." });
+  }
+
+  return issues;
+}
+
+/* ── CONVERSATIONS ── */
+
+const CONVERSATIONS = [
+  { topic: "Your Weekend", starter: "Hi! What did you do last weekend? Did you go anywhere fun?\n\n(지난 주말에 뭐 했어요? 어디 재미있는 곳에 갔어요?)", followups: ["That sounds nice! Who did you go with?","What was the best part?","Do you do that every weekend, or was it something special?","Would you go there again? Why or why not?","That's great! What are your plans for next weekend?"] },
+  { topic: "Favorite Food", starter: "Let's talk about food! What is your favorite Korean food? Can you describe how it tastes?\n\n(좋아하는 한국 음식이 뭐예요? 맛을 설명해 주세요!)", followups: ["Mmm, that sounds delicious! Can you cook it yourself?","What ingredients do you need?","Have you tried any foreign food you really liked?","If you could eat only one food forever, what would it be?","Do you prefer eating out or cooking at home? Why?"] },
+  { topic: "Daily Routine", starter: "Tell me about your daily routine! What time do you usually wake up?\n\n(하루 일과를 알려주세요! 보통 몇 시에 일어나요?)", followups: ["That's interesting! What do you have for breakfast?","How do you get to work or school?","What do you usually do after work/school?","What time do you go to bed? Do you think you sleep enough?","Is there anything you'd like to change about your routine?"] },
+  { topic: "Travel Dreams", starter: "If you could go anywhere in the world, where would you go? Why?\n\n(세계 어디든 갈 수 있다면 어디에 가고 싶어요?)", followups: ["That's a great choice! What would you do there?","Have you traveled abroad before? Where did you go?","Do you prefer the beach or the mountains?","What's the most important thing to bring when traveling?","Would you rather travel alone or with someone? Why?"] },
+  { topic: "Hobbies", starter: "What do you like to do in your free time? Do you have any hobbies?\n\n(여가 시간에 뭐 하는 걸 좋아해요? 취미가 있어요?)", followups: ["How often do you do that?","When did you start? How did you get interested?","Is there a new hobby you'd like to try?","Do you prefer indoor or outdoor activities?","That sounds fun! Can you teach me about it?"] },
+  { topic: "K-Drama & Movies", starter: "Do you like watching K-dramas or movies? What's the last one you watched?\n\n(드라마나 영화 좋아해요? 마지막으로 본 게 뭐예요?)", followups: ["What was it about? Can you tell me the story briefly?","Who was your favorite character? Why?","Do you prefer romance, comedy, or action?","Have you watched anything in English? Was it difficult?","If you could be any character, who would you be?"] },
+  { topic: "Weather & Seasons", starter: "What's the weather like today? What's your favorite season and why?\n\n(오늘 날씨가 어때요? 좋아하는 계절은?)", followups: ["What do you usually do in that season?","Do you like rainy days? Why or why not?","What kind of clothes do you wear in winter?","Have you ever experienced very extreme weather?","If you could live in perfect weather, where would it be?"] },
+  { topic: "Friends & Family", starter: "Tell me about your friends! Do you have a best friend? How did you meet?\n\n(친구에 대해 알려주세요! 가장 친한 친구가 있어요?)", followups: ["How long have you been friends?","What do you usually do together?","What makes a good friend, in your opinion?","Do you prefer spending time with friends or alone?","Tell me about a happy memory with your friends!"] },
+];
+
+/* ── GRAMMAR ── */
+
+const GRAMMAR = {
+  ps: { title: "Present Simple vs. Continuous", lesson: `**Present Simple** = habits, facts, routines\n**Present Continuous** = happening right now\n\n🇰🇷 현재 시제는 습관/사실, 현재 진행형은 지금 일어나는 일이에요.\n\n📖 Examples:\n• I **drink** coffee every morning. (habit)\n• I **am drinking** coffee right now. (now)\n• She **works** at a bank. (fact)\n• She **is working** from home today. (temporary)\n\n✏️ Practice — fill in the correct form:\n1. I usually ___ (walk) to school, but today I ___ (take) the bus.\n2. He ___ (watch) TV right now.\n3. We ___ (eat) lunch at 12 every day.\n\nType your answers below!` },
+  pt: { title: "Past Simple Tense", lesson: `**Past Simple** = finished actions in the past\n\n🇰🇷 과거에 끝난 일을 말할 때 사용해요.\n\nRegular: add **-ed** (walked, played)\nIrregular: memorize! (go→**went**, eat→**ate**, see→**saw**)\n\n📖 Examples:\n• I **went** to the store yesterday.\n• She **cooked** dinner last night.\n• They **didn't watch** the movie.\n\n✏️ Practice — change to past tense:\n1. I (go) to the beach last summer.\n2. She (eat) pizza for dinner.\n3. We (not/play) soccer yesterday.\n\nType your answers below!` },
+  ar: { title: "Articles: a / an / the", lesson: `This is the hardest for Korean speakers!\n🇰🇷 한국어에는 관사가 없어서 어려워요.\n\n**a/an** = one of many (not specific)\n**the** = we both know which one\n**no article** = general/uncountable\n\n📖 Examples:\n• I saw **a** dog. → **The** dog was cute.\n• I love **∅** music. (general)\n• Pass me **the** salt. (specific)\n\n✏️ Fill in a, an, the, or nothing (∅):\n1. I need ___ umbrella.\n2. She is ___ doctor.\n3. ___ sun is very bright today.\n\nType your answers below!` },
+  pr: { title: "Prepositions of Time & Place", lesson: `🇰🇷 에/에서/로와 비슷하지만 규칙이 달라요!\n\n**Time:** **at** + time, **on** + day, **in** + month/year\n**Place:** **at** + point, **on** + surface, **in** + enclosed\n\n📖 Examples:\n• I wake up **at** 7 AM **in** the morning.\n• The meeting is **on** Friday.\n• She lives **in** Seoul.\n\n✏️ Fill in at, on, or in:\n1. I was born ___ 1995.\n2. Let's meet ___ the cafe ___ Saturday.\n3. The keys are ___ the table.\n\nType your answers below!` },
+  cu: { title: "Countable vs. Uncountable", lesson: `**Countable** = 1 apple, 2 apples\n**Uncountable** = water, music, money\n\n🇰🇷 영어는 셀 수 있는/없는 명사가 중요해요!\n\n**Countable:** many, few, how many?\n**Uncountable:** much, little, how much?\n\n✏️ Choose many/much or few/little:\n1. How ___ sugar do you want?\n2. There are too ___ cars on the road.\n3. I have very ___ time today.\n\nType your answers below!` },
+  co: { title: "Comparatives & Superlatives", lesson: `**Comparative** = comparing 2 (bigger)\n**Superlative** = #1 of all (biggest)\n\n🇰🇷 비교급과 최상급!\n\nShort words: **-er / -est**\nLong words: **more / most**\nIrregular: good→**better**→**best**\n\n✏️ Practice:\n1. Summer is ___ (hot) than spring.\n2. This is the ___ (good) restaurant.\n3. English is ___ (difficult) than I expected.\n\nType your answers below!` },
+  fu: { title: "Future: will vs. going to", lesson: `**will** = spontaneous decisions, predictions\n**going to** = planned actions\n\n🇰🇷 둘 다 미래지만 상황이 달라요!\n\n📖 Examples:\n• "I'm hungry." → "I**'ll** make you food." (spontaneous)\n• I**'m going to** visit Japan next month. (planned)\n\n✏️ Choose will or going to:\n1. I ___ (start) a new job Monday. (planned)\n2. "Phone's ringing!" "I ___ (answer) it."\n3. She ___ (travel) to Europe this summer. (planned)\n\nType your answers below!` },
+  mo: { title: "Modal Verbs", lesson: `🇰🇷 조동사는 뉘앙스를 바꿔요!\n\n• **can** = ability (할 수 있다)\n• **should** = advice (하는 게 좋다)\n• **must** = obligation (해야 한다)\n• **might** = possibility (할 수도 있다)\n\n⚠️ No "s": He **can** swim.\n⚠️ No "to": I **can** go.\n\n✏️ Fill in can, should, must, or might:\n1. You ___ see a doctor. (advice)\n2. I ___ speak Korean and English. (ability)\n3. She ___ come to the party. (possibility)\n\nType your answers below!` },
+  pp: { title: "Present Perfect", lesson: `**have/has + past participle**\n= past action connected to now\n\n🇰🇷 지금과 연결된 경험이나 결과!\n\n• I **have been** to Japan. (experience)\n• I **have lost** my keys. (result)\n• I **have lived** here for 3 years. (duration)\n\n⚠️ No specific past time!\n❌ I have been yesterday.\n✅ I **went** yesterday.\n\n✏️ Practice:\n1. I ___ never ___ (try) Thai food.\n2. She ___ (live) in Seoul for 5 years.\n3. ___ you ever ___ (visit) Europe?\n\nType your answers below!` },
+  rc: { title: "Relative Clauses", lesson: `• **who** = people\n• **which** = things\n• **that** = both\n\n🇰🇷 한국어: 명사 앞에 설명\n🇬🇧 English: 명사 뒤에 설명!\n\n• The woman **who** lives next door is nice.\n• The book **which** I bought is great.\n\n✏️ Fill in who, which, or that:\n1. The teacher ___ teaches English is kind.\n2. The phone ___ I bought is broken.\n3. I have a friend ___ lives in London.\n\nType your answers below!` },
+};
+
+/* ── VOCAB ── */
+
+const VOCAB = {
+  food: { title: "Food & Cooking", lesson: `**Food & Cooking**\n\n1. **ingredient** (재료) — "We need fresh ingredients." → key ingredient\n2. **recipe** (레시피) — "I found a great recipe." → follow a recipe\n3. **chop** (썰다) — "Chop the onions." → finely chopped\n4. **boil** (끓이다) — "Boil the water first." → boiling hot\n5. **fry** (튀기다) — "Fry the egg in butter." → stir-fry\n6. **delicious** (맛있는) — "This cake is delicious!" → looks delicious\n7. **bland** (싱거운) — "Too bland — add salt." → bland taste\n8. **leftovers** (남은 음식) — "I'll eat leftovers tomorrow." → heat up leftovers\n\n✏️ Quiz:\n1. The soup is too ___. Add more salt.\n2. Can you ___ the vegetables into small pieces?\n3. I always follow a ___ when cooking.\n\nType your answers!` },
+  travel: { title: "Travel", lesson: `**Travel & Transport**\n\n1. **boarding pass** (탑승권) → print your boarding pass\n2. **luggage** (수하물) → carry-on luggage\n3. **departure** (출발) → departure gate\n4. **delay** (지연) → long delay\n5. **transfer** (환승) → transfer ticket\n6. **destination** (목적지) → popular destination\n7. **round trip** (왕복) → round-trip ticket\n8. **customs** (세관) → customs officer\n\n✏️ Quiz:\n1. Don't forget your ___ or you can't board!\n2. Our flight has a two-hour ___.\n3. I booked a ___ ___ ticket.\n\nType your answers!` },
+  work: { title: "Work & Office", lesson: `**Work & Office**\n\n1. **deadline** (마감일) → meet a deadline\n2. **colleague** (동료) → close colleague\n3. **meeting** (회의) → schedule a meeting\n4. **presentation** (발표) → prepare a presentation\n5. **overtime** (야근) → paid overtime\n6. **resign** (사직하다) → resign from\n7. **salary** (월급) → monthly salary\n8. **promote** (승진) → get promoted\n\n✏️ Quiz:\n1. Finish before the ___ on Friday.\n2. She was ___ to senior manager.\n3. I worked ___ to finish the report.\n\nType your answers!` },
+  health: { title: "Health", lesson: `**Health & Body**\n\n1. **headache** (두통) → bad headache\n2. **fever** (열) → run a fever\n3. **prescription** (처방전) → fill a prescription\n4. **symptom** (증상) → common symptom\n5. **cough** (기침) → dry cough\n6. **recover** (회복) → fully recover\n7. **appointment** (예약) → doctor's appointment\n8. **exercise** (운동) → daily exercise\n\n✏️ Quiz:\n1. Make an ___ with the doctor.\n2. My main ___ is a sore throat.\n3. It takes a week to ___ from a cold.\n\nType your answers!` },
+  shopping: { title: "Shopping", lesson: `**Shopping & Money**\n\n1. **discount** (할인) → big discount\n2. **receipt** (영수증) → keep the receipt\n3. **refund** (환불) → get a refund\n4. **bargain** (좋은 거래) → great bargain\n5. **afford** (여유가 되다) → can't afford\n6. **budget** (예산) → monthly budget\n7. **cash** (현금) → pay in cash\n8. **charge** (요금) → no extra charge\n\n✏️ Quiz:\n1. 50% ___ on everything!\n2. I can't ___ a car right now.\n3. Keep the ___ for a ___.\n\nType your answers!` },
+  emotions: { title: "Emotions", lesson: `**Emotions & Feelings**\n\n1. **anxious** (불안한) → anxious about\n2. **relieved** (안도) → feel relieved\n3. **frustrated** (좌절) → frustrated with\n4. **grateful** (감사한) → grateful for\n5. **exhausted** (지친) → feel exhausted\n6. **confident** (자신감) → confident about\n7. **disappointed** (실망) → disappointed with\n8. **excited** (신나는) → excited about\n\n✏️ Quiz:\n1. I'm ___ about tomorrow's test.\n2. She was ___ when she heard the news.\n3. I'm so ___ about vacation!\n\nType your answers!` },
+  home: { title: "Home", lesson: `**Home & Daily Life**\n\n1. **chores** (집안일) → household chores\n2. **tidy** (정리) → keep tidy\n3. **laundry** (빨래) → do the laundry\n4. **commute** (통근) → daily commute\n5. **cozy** (아늑한) → cozy atmosphere\n6. **landlord** (집주인) → contact the landlord\n7. **groceries** (식료품) → grocery store\n8. **routine** (루틴) → daily routine\n\n✏️ Quiz:\n1. My daily ___ takes 30 minutes.\n2. Can you ___ up your room?\n3. I do ___ on weekends.\n\nType your answers!` },
+  weather: { title: "Weather", lesson: `**Weather & Nature**\n\n1. **forecast** (일기예보) → weather forecast\n2. **breeze** (산들바람) → gentle breeze\n3. **humid** (습한) → hot and humid\n4. **chilly** (쌀쌀한) → chilly weather\n5. **drought** (가뭄) → severe drought\n6. **bloom** (피다) → in full bloom\n7. **sunshine** (햇살) → bright sunshine\n8. **storm** (폭풍) → thunderstorm\n\n✏️ Quiz:\n1. Check the weather ___.\n2. Cherry blossoms are in full ___.\n3. It's ___ today — need a jacket.\n\nType your answers!` },
+  tech: { title: "Technology", lesson: `**Technology**\n\n1. **update** (업데이트) → software update\n2. **password** (비밀번호) → change password\n3. **download** (다운로드) → free download\n4. **charge** (충전) → fully charged\n5. **screen** (화면) → touch screen\n6. **connect** (연결) → connect to\n7. **notification** (알림) → push notification\n8. **storage** (저장) → cloud storage\n\n✏️ Quiz:\n1. My phone is dead — need to ___ it.\n2. Can't ___ to WiFi. What's the ___?\n3. ___ the app to the newest version.\n\nType your answers!` },
+  social: { title: "Social", lesson: `**Social & Relationships**\n\n1. **introduce** (소개) → introduce yourself\n2. **apologize** (사과) → apologize for\n3. **invite** (초대) → invite to\n4. **compliment** (칭찬) → pay a compliment\n5. **argue** (다투다) → argue about\n6. **trust** (신뢰) → build trust\n7. **support** (응원) → emotional support\n8. **forgive** (용서) → forgive someone for\n\n✏️ Quiz:\n1. Let me ___ myself.\n2. I want to ___ for the mistake.\n3. Good relationships need ___.\n\nType your answers!` },
+};
+
+/* ── TEXT RENDERER ── */
+
+const hasKorean = (s) => /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(s);
+
+function renderLine(line, j) {
+  return line.split(/(\*\*[^*]+\*\*)/).map((p, k) =>
+    p.startsWith("**") && p.endsWith("**")
+      ? <strong key={`${j}-${k}`} style={{ color: C.correctBold, fontWeight: 600 }}>{p.slice(2, -2)}</strong>
+      : p
+  );
+}
+
+function CoachBubble({ text }) {
+  const [showKR, setShowKR] = useState(false);
+  if (!text) return null;
+
+  const lines = text.split("\n");
+  let hasKR = false;
+
+  // Check if any Korean exists in the text at all
+  const koreanRegex = /[\uAC00-\uD7AF]/;
+  if (koreanRegex.test(text)) hasKR = true;
+
+  // Process a line: strip inline Korean parentheticals when flag is off
+  const processLine = (line) => {
+    if (showKR) return line;
+    // Remove inline Korean in parentheses: (마감일), (재료), etc.
+    let processed = line.replace(/\s*\([^)]*[\uAC00-\uD7AF][^)]*\)\s*/g, " ");
+    // Remove 🇰🇷 markers
+    processed = processed.replace(/🇰🇷/g, "").trim();
+    return processed;
+  };
+
+  // Determine if an entire line is Korean-only (should be hidden entirely when flag off)
+  const isFullKoreanLine = (line) => {
+    const koreanChars = (line.match(/[\uAC00-\uD7AF]/g) || []).length;
+    const totalAlpha = (line.match(/[a-zA-Z\uAC00-\uD7AF]/g) || []).length;
+    // Line is mostly Korean, or is a Korean parenthetical line, or is a 🇰🇷 line
+    if (koreanChars > 3 && totalAlpha > 0 && koreanChars / totalAlpha > 0.6) return true;
+    if (koreanChars > 0 && line.trim().startsWith("(") && line.trim().endsWith(")")) return true;
+    if (line.includes("🇰🇷") && koreanChars > 0) return true;
+    return false;
+  };
+
+  // If no Korean found, render normally without flag
+  if (!hasKR) {
+    return <span>{lines.map((line, i) => (
+      <span key={i}>{i > 0 && <br />}{renderLine(line, i)}</span>
+    ))}</span>;
+  }
+
+  // Build output
+  const outputLines = [];
+  lines.forEach((line, i) => {
+    if (isFullKoreanLine(line)) {
+      // Full Korean line — only show when flag is on
+      if (showKR) {
+        outputLines.push({ line, isKR: true, idx: i });
+      }
+    } else {
+      // English line (may contain inline Korean to strip)
+      outputLines.push({ line: processLine(line), isKR: false, idx: i });
+    }
+  });
+
+  return (
+    <span>
+      {outputLines.map((item, i) => (
+        <span key={i} style={item.isKR ? { opacity: 0.7, fontStyle: "italic" } : undefined}>
+          {i > 0 && <br />}
+          {item.line.trim() === "" ? null : renderLine(item.line, i)}
+        </span>
+      ))}
+      {/* Korean toggle button */}
+      <br />
+      <span
+        onClick={(e) => { e.stopPropagation(); setShowKR(!showKR); }}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 8,
+          padding: "6px 12px",
+          fontSize: 22,
+          borderRadius: 10,
+          cursor: "pointer",
+          background: showKR ? C.accentDeep : "rgba(0,0,0,0.06)",
+          transition: "all 0.15s",
+          userSelect: "none",
+          lineHeight: 1,
+        }}
+      >
+        🇰🇷
+      </span>
+    </span>
+  );
+}
+
+/* ═══ TOPIC DATA ═══ */
+
+const GTOPICS = [
+  { key: "ps", title: "Present Simple vs. Continuous" },
+  { key: "pt", title: "Past Simple Tense" },
+  { key: "ar", title: "Articles: a / an / the" },
+  { key: "pr", title: "Prepositions" },
+  { key: "cu", title: "Countable vs. Uncountable" },
+  { key: "co", title: "Comparatives & Superlatives" },
+  { key: "fu", title: "Future: will vs. going to" },
+  { key: "mo", title: "Modal Verbs" },
+  { key: "pp", title: "Present Perfect" },
+  { key: "rc", title: "Relative Clauses" },
+];
+
+const VTOPICS = [
+  { key: "food", icon: "🍳", title: "Food" },
+  { key: "travel", icon: "✈️", title: "Travel" },
+  { key: "work", icon: "💼", title: "Work" },
+  { key: "health", icon: "🏥", title: "Health" },
+  { key: "shopping", icon: "🛍️", title: "Shopping" },
+  { key: "emotions", icon: "💭", title: "Emotions" },
+  { key: "home", icon: "🏠", title: "Home" },
+  { key: "weather", icon: "🌤️", title: "Weather" },
+  { key: "tech", icon: "📱", title: "Tech" },
+  { key: "social", icon: "👥", title: "Social" },
+];
+
+const TALK_ICONS = ["☀️", "🍜", "⏰", "✈️", "🎨", "🎬", "🌸", "💬"];
+
+/* ═══ APP ═══ */
+
+function App() {
+  const [view, setView] = useState("home");
+  const [chat, setChat] = useState([]);
+  const [input, setInput] = useState("");
+  const [topic, setTopic] = useState(null);
+  const [convo, setConvo] = useState(null);
+  const [step, setStep] = useState(0);
+  const endRef = useRef(null);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat]);
+
+  const goHome = () => { setView("home"); setChat([]); setTopic(null); setConvo(null); setStep(0); setInput(""); };
+
+  const startTalk = (c) => { setConvo(c); setStep(0); setTopic({ title: c.topic, mode: "FREE_TALK" }); setChat([{ role: "assistant", content: c.starter }]); setView("chat"); };
+  const startGrammar = (key) => { const g = GRAMMAR[key]; setTopic({ title: g.title, mode: "GRAMMAR" }); setChat([{ role: "assistant", content: g.lesson }]); setView("chat"); };
+  const startVocab = (key) => { const v = VOCAB[key]; setTopic({ title: v.title, mode: "VOCAB" }); setChat([{ role: "assistant", content: v.lesson }]); setView("chat"); };
+
+  const send = () => {
+    const msg = input.trim();
+    if (!msg) return;
+    setInput("");
+    const newChat = [...chat, { role: "user", content: msg }];
+    const errors = checkErrors(msg);
+    const validation = validateSentence(msg);
+    let response = "";
+    let hasIssues = false;
+
+    // Grammar pattern errors
+    if (errors.length > 0) {
+      hasIssues = true;
+      response = errors.map(e => {
+        let b = `❌  "${e.original}"`;
+        if (e.fixed) b += `\n✅  ${e.fixed}`;
+        b += `\n💡  ${e.tip}`;
+        return b;
+      }).join("\n\n");
+    }
+
+    // Spell check & sentence validation
+    if (validation.length > 0) {
+      hasIssues = true;
+      const vParts = validation.map(v => {
+        if (v.type === "gibberish") return `⚠️  ${v.tip}`;
+        if (v.type === "spelling") return `📝  ${v.tip}`;
+        if (v.type === "short") return `✍️  ${v.tip}`;
+        if (v.type === "capital") return `🔤  ${v.tip}`;
+        if (v.type === "punctuation") return `✏️  ${v.tip}`;
+        return `💡  ${v.tip}`;
+      });
+      if (response) response += "\n\n";
+      response += vParts.join("\n\n");
+    }
+
+    if (hasIssues) {
+      response += "\n\nTry again! ✍️";
+      // Don't advance conversation — stay on same question
+      if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
+        response += "\nYou can do it!";
+      }
+    } else if (msg.length > 5) {
+      const p = ["Great sentence! ✨","Nice work — no errors!","Very good English! 👏","Perfect! Keep it up! 💪","Well done — that's correct! 🌟"];
+      response = p[Math.floor(Math.random() * p.length)] + "\n\n";
+      // Only advance when answer is valid
+      if (convo && topic?.mode === "FREE_TALK") {
+        const ns = Math.min(step + 1, convo.followups.length - 1);
+        response += convo.followups[step] || "Tell me more!";
+        setStep(ns);
+      } else if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
+        response += "Want to try more, or go back and pick another topic?";
+      }
+    } else {
+      response = "Try writing a longer sentence! ✍️";
+    }
+    newChat.push({ role: "assistant", content: response });
+    setChat(newChat);
+  };
+
+  /* ═══ STYLES ═══ */
+
+  return (
+    <div style={{
+      display: "flex", flexDirection: "column", height: "100vh",
+      maxWidth: 460, margin: "0 auto",
+      background: `linear-gradient(180deg, ${C.bgDarkest} 0%, ${C.bgDarker} 30%, ${C.bgBase} 70%, ${C.bgDarker} 100%)`,
+      fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif",
+      color: C.dark,
+      letterSpacing: "0.01em",
+      position: "relative",
+    }}>
+      {/* Quilted diamond texture overlay */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0, opacity: 0.22,
+        backgroundImage: `repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(255,255,255,0.6) 10px,
+          rgba(255,255,255,0.6) 11.5px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 10px,
+          rgba(255,255,255,0.6) 10px,
+          rgba(255,255,255,0.6) 11.5px
+        ),
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(0,0,0,0.15) 11.5px,
+          rgba(0,0,0,0.15) 12px
+        ),
+        repeating-linear-gradient(
+          -45deg,
+          transparent,
+          transparent 10px,
+          rgba(0,0,0,0.15) 11.5px,
+          rgba(0,0,0,0.15) 12px
+        )`,
+        backgroundSize: "15px 15px",
+      }} />
+
+      {/* Font imports + silver shine */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        .silver-text {
+          background: linear-gradient(
+            105deg,
+            #727E86 0%,
+            #9EAAB3 20%,
+            #C5CDD3 35%,
+            #ACB6BE 45%,
+            #7E8C95 55%,
+            #9DAAB2 70%,
+            #BCC5CB 80%,
+            #8B98A1 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          background-size: 200% 100%;
+          animation: silverShimmer 6s ease-in-out infinite;
+        }
+        @keyframes silverShimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .silver-sub {
+          background: linear-gradient(
+            105deg,
+            #636E76 0%,
+            #808E97 40%,
+            #9EAAB3 60%,
+            #758088 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .chat-input::placeholder {
+          color: #8DA3A3;
+          opacity: 1;
+        }
+      `}</style>
+
+      {/* ── HEADER ── */}
+      <div style={{
+        padding: "18px 20px",
+        background: C.headerBg,
+        borderBottom: `1px solid ${C.silverLight}`,
+        display: "flex", alignItems: "center",
+        flexShrink: 0,
+        position: "relative", zIndex: 1,
+      }}>
+        {/* Back arrow — fixed left */}
+        <div style={{ width: 36, flexShrink: 0 }}>
+          {view !== "home" && (
+            <div onClick={goHome} style={{
+              cursor: "pointer", fontSize: 18, color: "#D0D8DD",
+              width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+              borderRadius: 8,
+            }}>←</div>
+          )}
+        </div>
+
+        {/* Centered title */}
+        <div style={{ flex: 1, textAlign: "center" }}>
+          {view === "home" ? (
+            <div className="silver-text" style={{ fontSize: 21, fontWeight: 500, letterSpacing: "0.2px", fontFamily: F.serif }}>
+              <span>Private English Tutor for <i>Mi Jung</i></span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 21, fontWeight: 500, letterSpacing: "0.2px", fontFamily: F.serif, color: "#D5DDE2" }}>
+              {view === "topics" ? "Free Talk" : view === "grammar" ? "Grammar Gym" : view === "vocab" ? "Word Builder" : topic?.title || ""}
+            </div>
+          )}
+          {view !== "home" && <div style={{ fontSize: 9.5, marginTop: 3, fontWeight: 500, letterSpacing: "1.2px", textTransform: "uppercase", fontFamily: F.sans, color: "#ADBCC3" }}>
+            {view === "topics" ? "Choose a conversation" : view === "grammar" ? "Choose a topic" : view === "vocab" ? "Choose a theme" : topic?.mode === "FREE_TALK" ? "Free conversation" : topic?.mode === "GRAMMAR" ? "Grammar practice" : "Vocabulary practice"}
+          </div>}
+        </div>
+
+        {/* Spacer for centered title balance */}
+        <div style={{ width: 36, flexShrink: 0 }} />
+      </div>
+
+      {/* ── BODY ── */}
+      <div style={{ flex: 1, overflowY: "auto", padding: 20, position: "relative", zIndex: 1 }}>
+
+        {/* HOME */}
+        {view === "home" && <>
+          {/* Hero card — styled like the Tiffany box */}
+          <div style={{
+            background: `linear-gradient(135deg, #3A9E98 0%, ${C.accentDeep} 40%, ${C.accent} 70%, ${C.accentSoft} 100%)`,
+            borderRadius: 20, padding: "28px 24px",
+            color: C.white, marginBottom: 28,
+            boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 2px 8px ${C.accent}30`,
+          }}>
+            <div style={{ fontSize: 26, fontWeight: 500, marginBottom: 6, letterSpacing: "-0.3px", fontFamily: F.serif }}>Welcome back, MJ</div>
+            <div style={{ fontSize: 13, opacity: 0.7, lineHeight: 1.6, fontWeight: 400, fontFamily: F.sans }}>다시 오셨네요! 오늘도 영어 연습해요.</div>
+            <div style={{ fontSize: 17, lineHeight: 1.6, fontWeight: 400, marginTop: 8, color: C.white, fontFamily: F.serif, fontStyle: "italic" }}>Let's get to work.</div>
+          </div>
+
+          {/* Mode cards */}
+          {[
+            { label: "Free Talk", sub: "Chat naturally & get corrections", tag: "자유", fn: () => setView("topics") },
+            { label: "Grammar Gym", sub: "Structured lessons & exercises", tag: "문법", fn: () => setView("grammar") },
+            { label: "Word Builder", sub: "Themed vocabulary & quizzes", tag: "단어", fn: () => setView("vocab") },
+          ].map((m, i) => (
+            <div key={i} onClick={m.fn} style={{
+              background: C.cardBg,
+              border: "none",
+              borderRadius: 16, padding: "20px",
+              marginBottom: 12, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 16,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              transition: "box-shadow 0.15s, transform 0.15s",
+            }}>
+              <div style={{
+                width: 46, height: 46, borderRadius: 12,
+                background: `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12, fontWeight: 700, color: C.white, fontFamily: F.sans,
+                letterSpacing: "0.5px", flexShrink: 0,
+                boxShadow: `0 2px 10px ${C.accent}40`,
+              }}>{m.tag}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 500, fontSize: 16, color: C.dark, marginBottom: 3, fontFamily: F.serif }}>{m.label}</div>
+                <div style={{ fontSize: 12, color: C.darkMuted, lineHeight: 1.4, fontFamily: F.sans }}>{m.sub}</div>
+              </div>
+              <div style={{ color: C.silver, fontSize: 16, fontWeight: 300 }}>›</div>
+            </div>
+          ))}
+
+          {/* Progress Report */}
+          <div onClick={() => {}} style={{
+            background: C.cardBg,
+            border: "none",
+            borderRadius: 16, padding: "12px 20px",
+            marginBottom: 12, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 16,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            opacity: 0.85,
+          }}>
+            <div style={{
+              width: 46, height: 34, borderRadius: 10,
+              background: `linear-gradient(135deg, ${C.silver}, ${C.darkMuted})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 14, flexShrink: 0,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            }}>📊</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 500, fontSize: 14, color: C.dark, fontFamily: F.serif }}>Progress Report</div>
+            </div>
+            <div style={{ color: C.silver, fontSize: 16, fontWeight: 300 }}>›</div>
+          </div>
+
+          {/* Tip */}
+          <div style={{
+            marginTop: 20, padding: "16px 18px",
+            background: "rgba(255,255,255,0.12)",
+            border: `1px solid rgba(255,255,255,0.18)`,
+            borderRadius: 14,
+            fontSize: 12.5, color: C.textOnDark, lineHeight: 1.65, fontWeight: 400,
+            fontFamily: F.sans,
+            backdropFilter: "blur(4px)",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+          }}>
+            <span style={{ color: "#9EAAB3", fontWeight: 600, fontFamily: F.serif, fontSize: 13.5 }}>Tip</span>
+            <span style={{ color: C.textMutedOnDark }}> — </span>
+            Everything works instantly, no waiting. Your tutor checks grammar automatically as you type.
+          </div>
+        </>}
+
+        {/* FREE TALK PICKER */}
+        {view === "topics" && CONVERSATIONS.map((c, i) => (
+          <div key={i} onClick={() => startTalk(c)} style={{
+            background: C.cardBg, border: "none",
+            borderRadius: 14, padding: "16px 18px",
+            display: "flex", alignItems: "center", gap: 14,
+            marginBottom: 10, cursor: "pointer",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 10,
+              background: `linear-gradient(135deg, ${C.accent}20, ${C.accentDeep}20)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 18, flexShrink: 0,
+            }}>{TALK_ICONS[i]}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 500, fontSize: 15, color: C.dark, fontFamily: F.serif }}>{c.topic}</div>
+              <div style={{ fontSize: 11, color: C.darkMuted, marginTop: 2, lineHeight: 1.3 }}>{c.starter.split("\n")[0].slice(0, 45)}...</div>
+            </div>
+            <div style={{ color: C.silver, fontSize: 14 }}>›</div>
+          </div>
+        ))}
+
+        {/* GRAMMAR PICKER */}
+        {view === "grammar" && GTOPICS.map((t, i) => (
+          <div key={t.key} onClick={() => startGrammar(t.key)} style={{
+            background: C.cardBg, border: "none",
+            borderRadius: 14, padding: "16px 18px",
+            display: "flex", alignItems: "center", gap: 14,
+            marginBottom: 10, cursor: "pointer",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8,
+              background: `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`,
+              border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 12, fontWeight: 700, color: C.white, flexShrink: 0,
+            }}>{i + 1}</div>
+            <div style={{ flex: 1, fontWeight: 500, fontSize: 14, color: C.dark, fontFamily: F.serif }}>{t.title}</div>
+            <div style={{ color: C.silver, fontSize: 14 }}>›</div>
+          </div>
+        ))}
+
+        {/* VOCAB PICKER */}
+        {view === "vocab" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {VTOPICS.map(t => (
+              <div key={t.key} onClick={() => startVocab(t.key)} style={{
+                background: C.cardBg, border: "none",
+                borderRadius: 14, padding: "20px 14px",
+                textAlign: "center", cursor: "pointer",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+              }}>
+                <div style={{ fontSize: 26, marginBottom: 6 }}>{t.icon}</div>
+                <div style={{ fontWeight: 500, fontSize: 13, color: C.dark, letterSpacing: "0.2px", fontFamily: F.serif }}>{t.title}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* CHAT */}
+        {view === "chat" && <>
+          {chat.map((m, i) => (
+            <div key={i} style={{
+              display: "flex",
+              justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+              marginBottom: 14,
+              paddingLeft: m.role === "user" ? 48 : 0,
+              paddingRight: m.role === "user" ? 0 : 48,
+            }}>
+              <div style={{
+                background: m.role === "user"
+                  ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`
+                  : C.cardBg,
+                color: m.role === "user" ? C.white : C.dark,
+                padding: "12px 16px",
+                fontSize: 14,
+                lineHeight: 1.7,
+                whiteSpace: "pre-wrap",
+                borderRadius: m.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                border: "none",
+                boxShadow: m.role === "user"
+                  ? `0 3px 16px rgba(0,0,0,0.2)`
+                  : "0 3px 16px rgba(0,0,0,0.12)",
+                maxWidth: "100%",
+                fontWeight: 400,
+              }}>
+                {m.role === "user" ? m.content : <CoachBubble text={m.content} />}
+              </div>
+            </div>
+          ))}
+          <div ref={endRef} />
+        </>}
+      </div>
+
+      {/* ── INPUT BAR ── */}
+      {view === "chat" && (
+        <div style={{
+          padding: "12px 16px 20px",
+          borderTop: `1px solid ${C.silverLight}`,
+          background: C.headerBg,
+          display: "flex", gap: 10, alignItems: "center",
+          flexShrink: 0,
+          position: "relative", zIndex: 1,
+        }}>
+          <input
+            type="text"
+            className="chat-input"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); send(); } }}
+            placeholder="Type in English..."
+            style={{
+              flex: 1,
+              border: `1.5px solid ${C.silverLight}`,
+              borderRadius: 24,
+              padding: "11px 18px",
+              fontSize: 14,
+              background: C.cardBg,
+              color: C.dark,
+              outline: "none",
+              fontFamily: F.sans,
+              fontWeight: 400,
+              letterSpacing: "0.01em",
+              transition: "border-color 0.2s",
+            }}
+            onFocus={e => e.target.style.borderColor = C.accent}
+            onBlur={e => e.target.style.borderColor = C.silverLight}
+          />
+          <button
+            onClick={send}
+            disabled={!input.trim()}
+            style={{
+              width: 42, height: 42, borderRadius: "50%",
+              border: "none",
+              background: input.trim() ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})` : "rgba(255,255,255,0.1)",
+              color: C.white,
+              fontSize: 17, fontWeight: 600,
+              cursor: input.trim() ? "pointer" : "default",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: input.trim() ? `0 3px 14px ${C.accent}50` : "none",
+              transition: "all 0.2s",
+            }}
+          >↑</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
