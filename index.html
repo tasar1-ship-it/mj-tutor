@@ -15,7 +15,14 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body, #root { height: 100%; width: 100%; overflow: hidden; }
-  body { -webkit-font-smoothing: antialiased; }
+  body {
+    -webkit-font-smoothing: antialiased;
+    background: #2D7A7E;
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 11.5px),
+      repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 11.5px);
+    background-size: 15px 15px;
+  }
 </style>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -28,7 +35,7 @@ const { useState, useRef, useEffect } = React;
 
 
 /* ═══════════════════════════════════════════════
-   Private English Tutor for MJ — v32
+   Private English Tutor for MJ — v34
    Tiffany box texture + luxury typography + gold
    ═══════════════════════════════════════════════ */
 
@@ -207,31 +214,111 @@ const CONVERSATIONS = [
 /* ── GRAMMAR ── */
 
 const GRAMMAR = {
-  ps: { title: "Present Simple vs. Continuous", lesson: `**Present Simple** = habits, facts, routines\n**Present Continuous** = happening right now\n\n🇰🇷 현재 시제는 습관/사실, 현재 진행형은 지금 일어나는 일이에요.\n\n📖 Examples:\n• I **drink** coffee every morning. (habit)\n• I **am drinking** coffee right now. (now)\n• She **works** at a bank. (fact)\n• She **is working** from home today. (temporary)\n\n✏️ Practice — fill in the correct form:\n1. I usually ___ (walk) to school, but today I ___ (take) the bus.\n2. He ___ (watch) TV right now.\n3. We ___ (eat) lunch at 12 every day.\n\nType your answers below!` },
-  pt: { title: "Past Simple Tense", lesson: `**Past Simple** = finished actions in the past\n\n🇰🇷 과거에 끝난 일을 말할 때 사용해요.\n\nRegular: add **-ed** (walked, played)\nIrregular: memorize! (go→**went**, eat→**ate**, see→**saw**)\n\n📖 Examples:\n• I **went** to the store yesterday.\n• She **cooked** dinner last night.\n• They **didn't watch** the movie.\n\n✏️ Practice — change to past tense:\n1. I (go) to the beach last summer.\n2. She (eat) pizza for dinner.\n3. We (not/play) soccer yesterday.\n\nType your answers below!` },
-  ar: { title: "Articles: a / an / the", lesson: `This is the hardest for Korean speakers!\n🇰🇷 한국어에는 관사가 없어서 어려워요.\n\n**a/an** = one of many (not specific)\n**the** = we both know which one\n**no article** = general/uncountable\n\n📖 Examples:\n• I saw **a** dog. → **The** dog was cute.\n• I love **∅** music. (general)\n• Pass me **the** salt. (specific)\n\n✏️ Fill in a, an, the, or nothing (∅):\n1. I need ___ umbrella.\n2. She is ___ doctor.\n3. ___ sun is very bright today.\n\nType your answers below!` },
-  pr: { title: "Prepositions of Time & Place", lesson: `🇰🇷 에/에서/로와 비슷하지만 규칙이 달라요!\n\n**Time:** **at** + time, **on** + day, **in** + month/year\n**Place:** **at** + point, **on** + surface, **in** + enclosed\n\n📖 Examples:\n• I wake up **at** 7 AM **in** the morning.\n• The meeting is **on** Friday.\n• She lives **in** Seoul.\n\n✏️ Fill in at, on, or in:\n1. I was born ___ 1995.\n2. Let's meet ___ the cafe ___ Saturday.\n3. The keys are ___ the table.\n\nType your answers below!` },
-  cu: { title: "Countable vs. Uncountable", lesson: `**Countable** = 1 apple, 2 apples\n**Uncountable** = water, music, money\n\n🇰🇷 영어는 셀 수 있는/없는 명사가 중요해요!\n\n**Countable:** many, few, how many?\n**Uncountable:** much, little, how much?\n\n✏️ Choose many/much or few/little:\n1. How ___ sugar do you want?\n2. There are too ___ cars on the road.\n3. I have very ___ time today.\n\nType your answers below!` },
-  co: { title: "Comparatives & Superlatives", lesson: `**Comparative** = comparing 2 (bigger)\n**Superlative** = #1 of all (biggest)\n\n🇰🇷 비교급과 최상급!\n\nShort words: **-er / -est**\nLong words: **more / most**\nIrregular: good→**better**→**best**\n\n✏️ Practice:\n1. Summer is ___ (hot) than spring.\n2. This is the ___ (good) restaurant.\n3. English is ___ (difficult) than I expected.\n\nType your answers below!` },
-  fu: { title: "Future: will vs. going to", lesson: `**will** = spontaneous decisions, predictions\n**going to** = planned actions\n\n🇰🇷 둘 다 미래지만 상황이 달라요!\n\n📖 Examples:\n• "I'm hungry." → "I**'ll** make you food." (spontaneous)\n• I**'m going to** visit Japan next month. (planned)\n\n✏️ Choose will or going to:\n1. I ___ (start) a new job Monday. (planned)\n2. "Phone's ringing!" "I ___ (answer) it."\n3. She ___ (travel) to Europe this summer. (planned)\n\nType your answers below!` },
-  mo: { title: "Modal Verbs", lesson: `🇰🇷 조동사는 뉘앙스를 바꿔요!\n\n• **can** = ability (할 수 있다)\n• **should** = advice (하는 게 좋다)\n• **must** = obligation (해야 한다)\n• **might** = possibility (할 수도 있다)\n\n⚠️ No "s": He **can** swim.\n⚠️ No "to": I **can** go.\n\n✏️ Fill in can, should, must, or might:\n1. You ___ see a doctor. (advice)\n2. I ___ speak Korean and English. (ability)\n3. She ___ come to the party. (possibility)\n\nType your answers below!` },
-  pp: { title: "Present Perfect", lesson: `**have/has + past participle**\n= past action connected to now\n\n🇰🇷 지금과 연결된 경험이나 결과!\n\n• I **have been** to Japan. (experience)\n• I **have lost** my keys. (result)\n• I **have lived** here for 3 years. (duration)\n\n⚠️ No specific past time!\n❌ I have been yesterday.\n✅ I **went** yesterday.\n\n✏️ Practice:\n1. I ___ never ___ (try) Thai food.\n2. She ___ (live) in Seoul for 5 years.\n3. ___ you ever ___ (visit) Europe?\n\nType your answers below!` },
-  rc: { title: "Relative Clauses", lesson: `• **who** = people\n• **which** = things\n• **that** = both\n\n🇰🇷 한국어: 명사 앞에 설명\n🇬🇧 English: 명사 뒤에 설명!\n\n• The woman **who** lives next door is nice.\n• The book **which** I bought is great.\n\n✏️ Fill in who, which, or that:\n1. The teacher ___ teaches English is kind.\n2. The phone ___ I bought is broken.\n3. I have a friend ___ lives in London.\n\nType your answers below!` },
+  ps: { title: "Present Simple vs. Continuous", answers: [
+    { accept: ["walk", "am taking"], correct: "I usually **walk** to school, but today I **am taking** the bus." },
+    { accept: ["is watching"], correct: "He **is watching** TV right now." },
+    { accept: ["eat"], correct: "We **eat** lunch at 12 every day." },
+  ], lesson: `**Present Simple** = habits, facts, routines\n**Present Continuous** = happening right now\n\n🇰🇷 현재 시제는 습관/사실, 현재 진행형은 지금 일어나는 일이에요.\n\n📖 Examples:\n• I **drink** coffee every morning. (habit)\n• I **am drinking** coffee right now. (now)\n• She **works** at a bank. (fact)\n• She **is working** from home today. (temporary)\n\n✏️ Practice — fill in the correct form:\n1. I usually ___ (walk) to school, but today I ___ (take) the bus.\n2. He ___ (watch) TV right now.\n3. We ___ (eat) lunch at 12 every day.\n\nType your answers below!` },
+  pt: { title: "Past Simple Tense", answers: [
+    { accept: ["went"], correct: "I **went** to the beach last summer." },
+    { accept: ["ate"], correct: "She **ate** pizza for dinner." },
+    { accept: ["didn't play", "did not play"], correct: "We **didn't play** soccer yesterday." },
+  ], lesson: `**Past Simple** = finished actions in the past\n\n🇰🇷 과거에 끝난 일을 말할 때 사용해요.\n\nRegular: add **-ed** (walked, played)\nIrregular: memorize! (go→**went**, eat→**ate**, see→**saw**)\n\n📖 Examples:\n• I **went** to the store yesterday.\n• She **cooked** dinner last night.\n• They **didn't watch** the movie.\n\n✏️ Practice — change to past tense:\n1. I (go) to the beach last summer.\n2. She (eat) pizza for dinner.\n3. We (not/play) soccer yesterday.\n\nType your answers below!` },
+  ar: { title: "Articles: a / an / the", answers: [
+    { accept: ["an"], correct: "I need **an** umbrella." },
+    { accept: ["a"], correct: "She is **a** doctor." },
+    { accept: ["the"], correct: "**The** sun is very bright today." },
+  ], lesson: `This is the hardest for Korean speakers!\n🇰🇷 한국어에는 관사가 없어서 어려워요.\n\n**a/an** = one of many (not specific)\n**the** = we both know which one\n**no article** = general/uncountable\n\n📖 Examples:\n• I saw **a** dog. → **The** dog was cute.\n• I love **∅** music. (general)\n• Pass me **the** salt. (specific)\n\n✏️ Fill in a, an, the, or nothing (∅):\n1. I need ___ umbrella.\n2. She is ___ doctor.\n3. ___ sun is very bright today.\n\nType your answers below!` },
+  pr: { title: "Prepositions of Time & Place", answers: [
+    { accept: ["in"], correct: "I was born **in** 1995." },
+    { accept: ["at", "on"], correct: "Let's meet **at** the cafe **on** Saturday." },
+    { accept: ["on"], correct: "The keys are **on** the table." },
+  ], lesson: `🇰🇷 에/에서/로와 비슷하지만 규칙이 달라요!\n\n**Time:** **at** + time, **on** + day, **in** + month/year\n**Place:** **at** + point, **on** + surface, **in** + enclosed\n\n📖 Examples:\n• I wake up **at** 7 AM **in** the morning.\n• The meeting is **on** Friday.\n• She lives **in** Seoul.\n\n✏️ Fill in at, on, or in:\n1. I was born ___ 1995.\n2. Let's meet ___ the cafe ___ Saturday.\n3. The keys are ___ the table.\n\nType your answers below!` },
+  cu: { title: "Countable vs. Uncountable", answers: [
+    { accept: ["much"], correct: "How **much** sugar do you want?" },
+    { accept: ["many"], correct: "There are too **many** cars on the road." },
+    { accept: ["little"], correct: "I have very **little** time today." },
+  ], lesson: `**Countable** = 1 apple, 2 apples\n**Uncountable** = water, music, money\n\n🇰🇷 영어는 셀 수 있는/없는 명사가 중요해요!\n\n**Countable:** many, few, how many?\n**Uncountable:** much, little, how much?\n\n✏️ Choose many/much or few/little:\n1. How ___ sugar do you want?\n2. There are too ___ cars on the road.\n3. I have very ___ time today.\n\nType your answers below!` },
+  co: { title: "Comparatives & Superlatives", answers: [
+    { accept: ["hotter"], correct: "Summer is **hotter** than spring." },
+    { accept: ["best"], correct: "This is the **best** restaurant." },
+    { accept: ["more difficult"], correct: "English is **more difficult** than I expected." },
+  ], lesson: `**Comparative** = comparing 2 (bigger)\n**Superlative** = #1 of all (biggest)\n\n🇰🇷 비교급과 최상급!\n\nShort words: **-er / -est**\nLong words: **more / most**\nIrregular: good→**better**→**best**\n\n✏️ Practice:\n1. Summer is ___ (hot) than spring.\n2. This is the ___ (good) restaurant.\n3. English is ___ (difficult) than I expected.\n\nType your answers below!` },
+  fu: { title: "Future: will vs. going to", answers: [
+    { accept: ["am going to", "going to start", "'m going to"], correct: "I **am going to** start a new job Monday." },
+    { accept: ["will", "'ll answer", "will answer"], correct: "I **will** answer it." },
+    { accept: ["is going to", "going to travel", "'s going to"], correct: "She **is going to** travel to Europe this summer." },
+  ], lesson: `**will** = spontaneous decisions, predictions\n**going to** = planned actions\n\n🇰🇷 둘 다 미래지만 상황이 달라요!\n\n📖 Examples:\n• "I'm hungry." → "I**'ll** make you food." (spontaneous)\n• I**'m going to** visit Japan next month. (planned)\n\n✏️ Choose will or going to:\n1. I ___ (start) a new job Monday. (planned)\n2. "Phone's ringing!" "I ___ (answer) it."\n3. She ___ (travel) to Europe this summer. (planned)\n\nType your answers below!` },
+  mo: { title: "Modal Verbs", answers: [
+    { accept: ["should"], correct: "You **should** see a doctor." },
+    { accept: ["can"], correct: "I **can** speak Korean and English." },
+    { accept: ["might"], correct: "She **might** come to the party." },
+  ], lesson: `🇰🇷 조동사는 뉘앙스를 바꿔요!\n\n• **can** = ability (할 수 있다)\n• **should** = advice (하는 게 좋다)\n• **must** = obligation (해야 한다)\n• **might** = possibility (할 수도 있다)\n\n⚠️ No "s": He **can** swim.\n⚠️ No "to": I **can** go.\n\n✏️ Fill in can, should, must, or might:\n1. You ___ see a doctor. (advice)\n2. I ___ speak Korean and English. (ability)\n3. She ___ come to the party. (possibility)\n\nType your answers below!` },
+  pp: { title: "Present Perfect", answers: [
+    { accept: ["have", "tried"], correct: "I **have** never **tried** Thai food." },
+    { accept: ["has lived", "has been living"], correct: "She **has lived** in Seoul for 5 years." },
+    { accept: ["have", "visited"], correct: "**Have** you ever **visited** Europe?" },
+  ], lesson: `**have/has + past participle**\n= past action connected to now\n\n🇰🇷 지금과 연결된 경험이나 결과!\n\n• I **have been** to Japan. (experience)\n• I **have lost** my keys. (result)\n• I **have lived** here for 3 years. (duration)\n\n⚠️ No specific past time!\n❌ I have been yesterday.\n✅ I **went** yesterday.\n\n✏️ Practice:\n1. I ___ never ___ (try) Thai food.\n2. She ___ (live) in Seoul for 5 years.\n3. ___ you ever ___ (visit) Europe?\n\nType your answers below!` },
+  rc: { title: "Relative Clauses", answers: [
+    { accept: ["who", "that"], correct: "The teacher **who** teaches English is kind." },
+    { accept: ["which", "that"], correct: "The phone **which** I bought is broken." },
+    { accept: ["who", "that"], correct: "I have a friend **who** lives in London." },
+  ], lesson: `• **who** = people\n• **which** = things\n• **that** = both\n\n🇰🇷 한국어: 명사 앞에 설명\n🇬🇧 English: 명사 뒤에 설명!\n\n• The woman **who** lives next door is nice.\n• The book **which** I bought is great.\n\n✏️ Fill in who, which, or that:\n1. The teacher ___ teaches English is kind.\n2. The phone ___ I bought is broken.\n3. I have a friend ___ lives in London.\n\nType your answers below!` },
 };
 
 /* ── VOCAB ── */
 
 const VOCAB = {
-  food: { title: "Food & Cooking", lesson: `**Food & Cooking**\n\n1. **ingredient** (재료) — "We need fresh ingredients." → key ingredient\n2. **recipe** (레시피) — "I found a great recipe." → follow a recipe\n3. **chop** (썰다) — "Chop the onions." → finely chopped\n4. **boil** (끓이다) — "Boil the water first." → boiling hot\n5. **fry** (튀기다) — "Fry the egg in butter." → stir-fry\n6. **delicious** (맛있는) — "This cake is delicious!" → looks delicious\n7. **bland** (싱거운) — "Too bland — add salt." → bland taste\n8. **leftovers** (남은 음식) — "I'll eat leftovers tomorrow." → heat up leftovers\n\n✏️ Quiz:\n1. The soup is too ___. Add more salt.\n2. Can you ___ the vegetables into small pieces?\n3. I always follow a ___ when cooking.\n\nType your answers!` },
-  travel: { title: "Travel", lesson: `**Travel & Transport**\n\n1. **boarding pass** (탑승권) → print your boarding pass\n2. **luggage** (수하물) → carry-on luggage\n3. **departure** (출발) → departure gate\n4. **delay** (지연) → long delay\n5. **transfer** (환승) → transfer ticket\n6. **destination** (목적지) → popular destination\n7. **round trip** (왕복) → round-trip ticket\n8. **customs** (세관) → customs officer\n\n✏️ Quiz:\n1. Don't forget your ___ or you can't board!\n2. Our flight has a two-hour ___.\n3. I booked a ___ ___ ticket.\n\nType your answers!` },
-  work: { title: "Work & Office", lesson: `**Work & Office**\n\n1. **deadline** (마감일) → meet a deadline\n2. **colleague** (동료) → close colleague\n3. **meeting** (회의) → schedule a meeting\n4. **presentation** (발표) → prepare a presentation\n5. **overtime** (야근) → paid overtime\n6. **resign** (사직하다) → resign from\n7. **salary** (월급) → monthly salary\n8. **promote** (승진) → get promoted\n\n✏️ Quiz:\n1. Finish before the ___ on Friday.\n2. She was ___ to senior manager.\n3. I worked ___ to finish the report.\n\nType your answers!` },
-  health: { title: "Health", lesson: `**Health & Body**\n\n1. **headache** (두통) → bad headache\n2. **fever** (열) → run a fever\n3. **prescription** (처방전) → fill a prescription\n4. **symptom** (증상) → common symptom\n5. **cough** (기침) → dry cough\n6. **recover** (회복) → fully recover\n7. **appointment** (예약) → doctor's appointment\n8. **exercise** (운동) → daily exercise\n\n✏️ Quiz:\n1. Make an ___ with the doctor.\n2. My main ___ is a sore throat.\n3. It takes a week to ___ from a cold.\n\nType your answers!` },
-  shopping: { title: "Shopping", lesson: `**Shopping & Money**\n\n1. **discount** (할인) → big discount\n2. **receipt** (영수증) → keep the receipt\n3. **refund** (환불) → get a refund\n4. **bargain** (좋은 거래) → great bargain\n5. **afford** (여유가 되다) → can't afford\n6. **budget** (예산) → monthly budget\n7. **cash** (현금) → pay in cash\n8. **charge** (요금) → no extra charge\n\n✏️ Quiz:\n1. 50% ___ on everything!\n2. I can't ___ a car right now.\n3. Keep the ___ for a ___.\n\nType your answers!` },
-  emotions: { title: "Emotions", lesson: `**Emotions & Feelings**\n\n1. **anxious** (불안한) → anxious about\n2. **relieved** (안도) → feel relieved\n3. **frustrated** (좌절) → frustrated with\n4. **grateful** (감사한) → grateful for\n5. **exhausted** (지친) → feel exhausted\n6. **confident** (자신감) → confident about\n7. **disappointed** (실망) → disappointed with\n8. **excited** (신나는) → excited about\n\n✏️ Quiz:\n1. I'm ___ about tomorrow's test.\n2. She was ___ when she heard the news.\n3. I'm so ___ about vacation!\n\nType your answers!` },
-  home: { title: "Home", lesson: `**Home & Daily Life**\n\n1. **chores** (집안일) → household chores\n2. **tidy** (정리) → keep tidy\n3. **laundry** (빨래) → do the laundry\n4. **commute** (통근) → daily commute\n5. **cozy** (아늑한) → cozy atmosphere\n6. **landlord** (집주인) → contact the landlord\n7. **groceries** (식료품) → grocery store\n8. **routine** (루틴) → daily routine\n\n✏️ Quiz:\n1. My daily ___ takes 30 minutes.\n2. Can you ___ up your room?\n3. I do ___ on weekends.\n\nType your answers!` },
-  weather: { title: "Weather", lesson: `**Weather & Nature**\n\n1. **forecast** (일기예보) → weather forecast\n2. **breeze** (산들바람) → gentle breeze\n3. **humid** (습한) → hot and humid\n4. **chilly** (쌀쌀한) → chilly weather\n5. **drought** (가뭄) → severe drought\n6. **bloom** (피다) → in full bloom\n7. **sunshine** (햇살) → bright sunshine\n8. **storm** (폭풍) → thunderstorm\n\n✏️ Quiz:\n1. Check the weather ___.\n2. Cherry blossoms are in full ___.\n3. It's ___ today — need a jacket.\n\nType your answers!` },
-  tech: { title: "Technology", lesson: `**Technology**\n\n1. **update** (업데이트) → software update\n2. **password** (비밀번호) → change password\n3. **download** (다운로드) → free download\n4. **charge** (충전) → fully charged\n5. **screen** (화면) → touch screen\n6. **connect** (연결) → connect to\n7. **notification** (알림) → push notification\n8. **storage** (저장) → cloud storage\n\n✏️ Quiz:\n1. My phone is dead — need to ___ it.\n2. Can't ___ to WiFi. What's the ___?\n3. ___ the app to the newest version.\n\nType your answers!` },
-  social: { title: "Social", lesson: `**Social & Relationships**\n\n1. **introduce** (소개) → introduce yourself\n2. **apologize** (사과) → apologize for\n3. **invite** (초대) → invite to\n4. **compliment** (칭찬) → pay a compliment\n5. **argue** (다투다) → argue about\n6. **trust** (신뢰) → build trust\n7. **support** (응원) → emotional support\n8. **forgive** (용서) → forgive someone for\n\n✏️ Quiz:\n1. Let me ___ myself.\n2. I want to ___ for the mistake.\n3. Good relationships need ___.\n\nType your answers!` },
+  food: { title: "Food & Cooking", answers: [
+    { accept: ["bland"], correct: "The soup is too **bland**." },
+    { accept: ["chop"], correct: "Can you **chop** the vegetables?" },
+    { accept: ["recipe"], correct: "I always follow a **recipe**." },
+  ], lesson: `**Food & Cooking**\n\n1. **ingredient** (재료) — "We need fresh ingredients." → key ingredient\n2. **recipe** (레시피) — "I found a great recipe." → follow a recipe\n3. **chop** (썰다) — "Chop the onions." → finely chopped\n4. **boil** (끓이다) — "Boil the water first." → boiling hot\n5. **fry** (튀기다) — "Fry the egg in butter." → stir-fry\n6. **delicious** (맛있는) — "This cake is delicious!" → looks delicious\n7. **bland** (싱거운) — "Too bland — add salt." → bland taste\n8. **leftovers** (남은 음식) — "I'll eat leftovers tomorrow." → heat up leftovers\n\n✏️ Quiz:\n1. The soup is too ___. Add more salt.\n2. Can you ___ the vegetables into small pieces?\n3. I always follow a ___ when cooking.\n\nType your answers!` },
+  travel: { title: "Travel", answers: [
+    { accept: ["boarding pass"], correct: "Don't forget your **boarding pass**!" },
+    { accept: ["delay"], correct: "Our flight has a two-hour **delay**." },
+    { accept: ["round trip"], correct: "I booked a **round trip** ticket." },
+  ], lesson: `**Travel & Transport**\n\n1. **boarding pass** (탑승권) → print your boarding pass\n2. **luggage** (수하물) → carry-on luggage\n3. **departure** (출발) → departure gate\n4. **delay** (지연) → long delay\n5. **transfer** (환승) → transfer ticket\n6. **destination** (목적지) → popular destination\n7. **round trip** (왕복) → round-trip ticket\n8. **customs** (세관) → customs officer\n\n✏️ Quiz:\n1. Don't forget your ___ or you can't board!\n2. Our flight has a two-hour ___.\n3. I booked a ___ ___ ticket.\n\nType your answers!` },
+  work: { title: "Work & Office", answers: [
+    { accept: ["deadline"], correct: "Finish before the **deadline** on Friday." },
+    { accept: ["promoted"], correct: "She was **promoted** to senior manager." },
+    { accept: ["overtime"], correct: "I worked **overtime** to finish the report." },
+  ], lesson: `**Work & Office**\n\n1. **deadline** (마감일) → meet a deadline\n2. **colleague** (동료) → close colleague\n3. **meeting** (회의) → schedule a meeting\n4. **presentation** (발표) → prepare a presentation\n5. **overtime** (야근) → paid overtime\n6. **resign** (사직하다) → resign from\n7. **salary** (월급) → monthly salary\n8. **promote** (승진) → get promoted\n\n✏️ Quiz:\n1. Finish before the ___ on Friday.\n2. She was ___ to senior manager.\n3. I worked ___ to finish the report.\n\nType your answers!` },
+  health: { title: "Health", answers: [
+    { accept: ["appointment"], correct: "Make an **appointment** with the doctor." },
+    { accept: ["symptom"], correct: "My main **symptom** is a sore throat." },
+    { accept: ["recover"], correct: "It takes a week to **recover** from a cold." },
+  ], lesson: `**Health & Body**\n\n1. **headache** (두통) → bad headache\n2. **fever** (열) → run a fever\n3. **prescription** (처방전) → fill a prescription\n4. **symptom** (증상) → common symptom\n5. **cough** (기침) → dry cough\n6. **recover** (회복) → fully recover\n7. **appointment** (예약) → doctor's appointment\n8. **exercise** (운동) → daily exercise\n\n✏️ Quiz:\n1. Make an ___ with the doctor.\n2. My main ___ is a sore throat.\n3. It takes a week to ___ from a cold.\n\nType your answers!` },
+  shopping: { title: "Shopping", answers: [
+    { accept: ["discount"], correct: "50% **discount** on everything!" },
+    { accept: ["afford"], correct: "I can't **afford** a car right now." },
+    { accept: ["receipt", "refund"], correct: "Keep the **receipt** for a **refund**." },
+  ], lesson: `**Shopping & Money**\n\n1. **discount** (할인) → big discount\n2. **receipt** (영수증) → keep the receipt\n3. **refund** (환불) → get a refund\n4. **bargain** (좋은 거래) → great bargain\n5. **afford** (여유가 되다) → can't afford\n6. **budget** (예산) → monthly budget\n7. **cash** (현금) → pay in cash\n8. **charge** (요금) → no extra charge\n\n✏️ Quiz:\n1. 50% ___ on everything!\n2. I can't ___ a car right now.\n3. Keep the ___ for a ___.\n\nType your answers!` },
+  emotions: { title: "Emotions", answers: [
+    { accept: ["anxious", "nervous"], correct: "I'm **anxious** about tomorrow's test." },
+    { accept: ["relieved"], correct: "She was **relieved** when she heard the news." },
+    { accept: ["excited"], correct: "I'm so **excited** about vacation!" },
+  ], lesson: `**Emotions & Feelings**\n\n1. **anxious** (불안한) → anxious about\n2. **relieved** (안도) → feel relieved\n3. **frustrated** (좌절) → frustrated with\n4. **grateful** (감사한) → grateful for\n5. **exhausted** (지친) → feel exhausted\n6. **confident** (자신감) → confident about\n7. **disappointed** (실망) → disappointed with\n8. **excited** (신나는) → excited about\n\n✏️ Quiz:\n1. I'm ___ about tomorrow's test.\n2. She was ___ when she heard the news.\n3. I'm so ___ about vacation!\n\nType your answers!` },
+  home: { title: "Home", answers: [
+    { accept: ["commute"], correct: "My daily **commute** takes 30 minutes." },
+    { accept: ["tidy"], correct: "Can you **tidy** up your room?" },
+    { accept: ["laundry", "chores"], correct: "I do **laundry** on weekends." },
+  ], lesson: `**Home & Daily Life**\n\n1. **chores** (집안일) → household chores\n2. **tidy** (정리) → keep tidy\n3. **laundry** (빨래) → do the laundry\n4. **commute** (통근) → daily commute\n5. **cozy** (아늑한) → cozy atmosphere\n6. **landlord** (집주인) → contact the landlord\n7. **groceries** (식료품) → grocery store\n8. **routine** (루틴) → daily routine\n\n✏️ Quiz:\n1. My daily ___ takes 30 minutes.\n2. Can you ___ up your room?\n3. I do ___ on weekends.\n\nType your answers!` },
+  weather: { title: "Weather", answers: [
+    { accept: ["forecast"], correct: "Check the weather **forecast**." },
+    { accept: ["bloom"], correct: "Cherry blossoms are in full **bloom**." },
+    { accept: ["chilly"], correct: "It's **chilly** today — need a jacket." },
+  ], lesson: `**Weather & Nature**\n\n1. **forecast** (일기예보) → weather forecast\n2. **breeze** (산들바람) → gentle breeze\n3. **humid** (습한) → hot and humid\n4. **chilly** (쌀쌀한) → chilly weather\n5. **drought** (가뭄) → severe drought\n6. **bloom** (피다) → in full bloom\n7. **sunshine** (햇살) → bright sunshine\n8. **storm** (폭풍) → thunderstorm\n\n✏️ Quiz:\n1. Check the weather ___.\n2. Cherry blossoms are in full ___.\n3. It's ___ today — need a jacket.\n\nType your answers!` },
+  tech: { title: "Technology", answers: [
+    { accept: ["charge"], correct: "My phone is dead — need to **charge** it." },
+    { accept: ["connect", "password"], correct: "Can't **connect** to WiFi. What's the **password**?" },
+    { accept: ["update"], correct: "**Update** the app to the newest version." },
+  ], lesson: `**Technology**\n\n1. **update** (업데이트) → software update\n2. **password** (비밀번호) → change password\n3. **download** (다운로드) → free download\n4. **charge** (충전) → fully charged\n5. **screen** (화면) → touch screen\n6. **connect** (연결) → connect to\n7. **notification** (알림) → push notification\n8. **storage** (저장) → cloud storage\n\n✏️ Quiz:\n1. My phone is dead — need to ___ it.\n2. Can't ___ to WiFi. What's the ___?\n3. ___ the app to the newest version.\n\nType your answers!` },
+  social: { title: "Social", answers: [
+    { accept: ["introduce"], correct: "Let me **introduce** myself." },
+    { accept: ["apologize"], correct: "I want to **apologize** for the mistake." },
+    { accept: ["trust"], correct: "Good relationships need **trust**." },
+  ], lesson: `**Social & Relationships**\n\n1. **introduce** (소개) → introduce yourself\n2. **apologize** (사과) → apologize for\n3. **invite** (초대) → invite to\n4. **compliment** (칭찬) → pay a compliment\n5. **argue** (다투다) → argue about\n6. **trust** (신뢰) → build trust\n7. **support** (응원) → emotional support\n8. **forgive** (용서) → forgive someone for\n\n✏️ Quiz:\n1. Let me ___ myself.\n2. I want to ___ for the mistake.\n3. Good relationships need ___.\n\nType your answers!` },
 };
 
 /* ── TEXT RENDERER ── */
@@ -378,20 +465,57 @@ function App() {
   const goHome = () => { setView("home"); setChat([]); setTopic(null); setConvo(null); setStep(0); setInput(""); };
 
   const startTalk = (c) => { setConvo(c); setStep(0); setTopic({ title: c.topic, mode: "FREE_TALK" }); setChat([{ role: "assistant", content: c.starter }]); setView("chat"); };
-  const startGrammar = (key) => { const g = GRAMMAR[key]; setTopic({ title: g.title, mode: "GRAMMAR" }); setChat([{ role: "assistant", content: g.lesson }]); setView("chat"); };
-  const startVocab = (key) => { const v = VOCAB[key]; setTopic({ title: v.title, mode: "VOCAB" }); setChat([{ role: "assistant", content: v.lesson }]); setView("chat"); };
+  const startGrammar = (key) => { const g = GRAMMAR[key]; setTopic({ title: g.title, mode: "GRAMMAR", key }); setChat([{ role: "assistant", content: g.lesson }]); setView("chat"); };
+  const startVocab = (key) => { const v = VOCAB[key]; setTopic({ title: v.title, mode: "VOCAB", key }); setChat([{ role: "assistant", content: v.lesson }]); setView("chat"); };
 
   const send = () => {
     const msg = input.trim();
     if (!msg) return;
     setInput("");
     const newChat = [...chat, { role: "user", content: msg }];
+    const msgLower = msg.toLowerCase();
+    let response = "";
+
+    // ── GRAMMAR / VOCAB MODE: check against answer keys ──
+    if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
+      const source = topic.mode === "GRAMMAR" ? GRAMMAR[topic.key] : VOCAB[topic.key];
+      const answers = source?.answers || [];
+
+      if (answers.length > 0) {
+        const results = [];
+        let allCorrect = true;
+
+        answers.forEach((ans, i) => {
+          const found = ans.accept.some(keyword => msgLower.includes(keyword.toLowerCase()));
+          if (found) {
+            results.push(`✅  Q${i + 1}: ${ans.correct}`);
+          } else {
+            allCorrect = false;
+            results.push(`❌  Q${i + 1}: Not quite. The answer is: ${ans.correct}`);
+          }
+        });
+
+        response = results.join("\n\n");
+
+        if (allCorrect) {
+          response += "\n\nPerfect — all correct! 🌟\n\nWant to try another topic, or go back to the menu?";
+        } else {
+          response += "\n\nSome answers need fixing. Read the lesson above and try again! ✍️";
+        }
+      } else {
+        response = "Type your answers to the quiz questions above!";
+      }
+
+      newChat.push({ role: "assistant", content: response });
+      setChat(newChat);
+      return;
+    }
+
+    // ── FREE TALK MODE: grammar + validation checks ──
     const errors = checkErrors(msg);
     const validation = validateSentence(msg);
-    let response = "";
     let hasIssues = false;
 
-    // Grammar pattern errors
     if (errors.length > 0) {
       hasIssues = true;
       response = errors.map(e => {
@@ -402,7 +526,6 @@ function App() {
       }).join("\n\n");
     }
 
-    // Spell check & sentence validation
     if (validation.length > 0) {
       hasIssues = true;
       const vParts = validation.map(v => {
@@ -419,20 +542,13 @@ function App() {
 
     if (hasIssues) {
       response += "\n\nTry again! ✍️";
-      // Don't advance conversation — stay on same question
-      if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
-        response += "\nYou can do it!";
-      }
     } else if (msg.length > 5) {
       const p = ["Great sentence! ✨","Nice work — no errors!","Very good English! 👏","Perfect! Keep it up! 💪","Well done — that's correct! 🌟"];
       response = p[Math.floor(Math.random() * p.length)] + "\n\n";
-      // Only advance when answer is valid
       if (convo && topic?.mode === "FREE_TALK") {
         const ns = Math.min(step + 1, convo.followups.length - 1);
         response += convo.followups[step] || "Tell me more!";
         setStep(ns);
-      } else if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
-        response += "Want to try more, or go back and pick another topic?";
       }
     } else {
       response = "Try writing a longer sentence! ✍️";
