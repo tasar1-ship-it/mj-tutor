@@ -6,6 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#3A8C90">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Private English Tutor for Mi Jung</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -35,7 +38,7 @@ const { useState, useRef, useEffect } = React;
 
 
 /* ═══════════════════════════════════════════════
-   Private English Tutor for MJ — v36
+   Private English Tutor for MJ — v37
    Tiffany box texture + luxury typography + gold
    ═══════════════════════════════════════════════ */
 
@@ -462,15 +465,16 @@ function App() {
   const [topic, setTopic] = useState(null);
   const [convo, setConvo] = useState(null);
   const [step, setStep] = useState(0);
+  const [quizDone, setQuizDone] = useState(false);
   const endRef = useRef(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chat]);
 
-  const goHome = () => { setView("home"); setChat([]); setTopic(null); setConvo(null); setStep(0); setInput(""); };
+  const goHome = () => { setView("home"); setChat([]); setTopic(null); setConvo(null); setStep(0); setQuizDone(false); setInput(""); };
 
-  const startTalk = (c) => { setConvo(c); setStep(0); setTopic({ title: c.topic, mode: "FREE_TALK" }); setChat([{ role: "assistant", content: c.starter }]); setView("chat"); };
-  const startGrammar = (key) => { const g = GRAMMAR[key]; setTopic({ title: g.title, mode: "GRAMMAR", key }); setChat([{ role: "assistant", content: g.lesson }]); setView("chat"); };
-  const startVocab = (key) => { const v = VOCAB[key]; setTopic({ title: v.title, mode: "VOCAB", key }); setChat([{ role: "assistant", content: v.lesson }]); setView("chat"); };
+  const startTalk = (c) => { setConvo(c); setStep(0); setQuizDone(false); setTopic({ title: c.topic, mode: "FREE_TALK" }); setChat([{ role: "assistant", content: c.starter }]); setView("chat"); };
+  const startGrammar = (key) => { const g = GRAMMAR[key]; setQuizDone(false); setTopic({ title: g.title, mode: "GRAMMAR", key }); setChat([{ role: "assistant", content: g.lesson }]); setView("chat"); };
+  const startVocab = (key) => { const v = VOCAB[key]; setQuizDone(false); setTopic({ title: v.title, mode: "VOCAB", key }); setChat([{ role: "assistant", content: v.lesson }]); setView("chat"); };
 
   const send = () => {
     const msg = input.trim();
@@ -482,6 +486,14 @@ function App() {
 
     // ── GRAMMAR / VOCAB MODE: check against answer keys ──
     if (topic?.mode === "GRAMMAR" || topic?.mode === "VOCAB") {
+
+      // After quiz is complete, any input goes back to menu
+      if (quizDone) {
+        setInput("");
+        goHome();
+        return;
+      }
+
       const source = topic.mode === "GRAMMAR" ? GRAMMAR[topic.key] : VOCAB[topic.key];
       const answers = source?.answers || [];
 
@@ -558,7 +570,8 @@ function App() {
         response = results.join("\n\n");
 
         if (allCorrect && answeredCount === numQ) {
-          response += "\n\nPerfect — all correct! 🌟\n\nWant to try another topic, or go back to the menu?";
+          setQuizDone(true);
+          response += "\n\nPerfect — all correct! 🌟\n\nType anything or tap ← to go back to the menu.";
         } else if (answeredCount < numQ) {
           response += `\n\nPlease answer all ${numQ} questions! Separate them with commas, like: answer1, answer2, answer3`;
         } else {
